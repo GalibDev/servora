@@ -2,10 +2,12 @@
   "name": "servora",
   "private": true,
   "version": "1.0.0",
+  "workspaces": ["client", "server"],
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
-    "build": "npm run build --prefix server && npm run build --prefix client",
-    "install:all": "npm install && npm install --prefix server && npm install --prefix client"
+    "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w server && npm run build -w client",
+    "postinstall": "npm run prisma:generate -w server",
+    "install:all": "npm install"
   },
   "devDependencies": { "concurrently": "^9.2.1" }
 }

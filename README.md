@@ -18,3 +18,16 @@ Demo accounts after seeding: `customer@servora.com` or `provider@servora.com`, p
 `server/src/routes` defines HTTP contracts, `server/src/services` contains business logic, `server/src/middleware` provides authentication/error boundaries, and `server/src/lib` owns shared infrastructure. Prisma models use normalized relations, enums, indexes, timestamps, mapped table names, and soft deletion. The client keeps all HTTP access in `client/src/api.ts`.
 
 See [API.md](./API.md) for the complete API contract.
+
+## Vercel deployment
+
+The repository is configured as an npm workspace. Vercel installs both client and server dependencies, generates Prisma Client during `postinstall`, builds the React app into `client/dist`, and serves Express through the serverless `api/index.ts` entrypoint.
+
+Add these environment variables in Vercel Project Settings before deploying:
+
+- `DATABASE_URL`: a pooled PostgreSQL connection URL from Neon/Supabase (recommended for serverless)
+- `JWT_SECRET`: a long random production secret
+- `CLIENT_URL`: the deployed Vercel URL (optional for same-origin deployment)
+- `VITE_API_URL`: `/api`
+
+Run production migrations against the same database before the first deployment: `npm run prisma:deploy -w server`.
