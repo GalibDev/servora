@@ -1,0 +1,14 @@
+.modal .primary:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.form-error {
+  margin: 12px 0;
+  padding: 11px 13px;
+  border: 1px solid #e6a89c;
+  border-radius: 5px;
+  background: #fff0ed;
+  color: #8c2f23;
+  font-size: 13px;
+}
