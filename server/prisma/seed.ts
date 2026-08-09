@@ -1,5 +1,4 @@
-import 'dotenv/config'; import bcrypt from 'bcryptjs'; import { PrismaClient } from '@prisma/client';
-const db=new PrismaClient();
+import 'dotenv/config'; import bcrypt from 'bcryptjs'; import { prisma as db } from '../src/lib/prisma.js';
 async function main(){
  const password=await bcrypt.hash('Password123!',12);
  const provider=await db.user.upsert({where:{email:'provider@servora.com'},update:{},create:{name:'Ariana Rahman',email:'provider@servora.com',password,role:'PROVIDER',avatar:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200'}});
