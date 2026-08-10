@@ -8,6 +8,7 @@ import { idParamsSchema, reviewCreateSchema, reviewUpdateSchema } from '../valid
 
 export const reviews = Router();
 reviews.get('/', asyncHandler(controller.list));
+reviews.get('/mine', auth, requireRole('CUSTOMER'), asyncHandler(controller.mine));
 reviews.get('/:id', validate(idParamsSchema, 'params'), asyncHandler(controller.byId));
 reviews.post('/', auth, requireRole('CUSTOMER'), validate(reviewCreateSchema), asyncHandler(controller.save));
 reviews.patch('/:id', auth, requireRole('CUSTOMER'), validate(idParamsSchema, 'params'), validate(reviewUpdateSchema), asyncHandler(controller.update));

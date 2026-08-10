@@ -137,7 +137,7 @@ function App() {
     finally { setBookingLoading(false); }
   };
 
-  if (dashboardOpen && user) return <Dashboard user={user} onClose={() => setDashboardOpen(false)} />;
+  if (dashboardOpen && user) return <Dashboard user={user} onClose={() => setDashboardOpen(false)} onUserChange={setUser} />;
 
   return <>
     {(initialLoading || servicesLoading || bookingLoading) && <div className="toast toast-loading" role="status"><span className="toast-spinner" /><div><strong>{bookingLoading ? 'Confirming your booking' : 'Loading services'}</strong><small>Please wait a moment…</small></div></div>}

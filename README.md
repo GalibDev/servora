@@ -15,11 +15,17 @@ Demo accounts after seeding: `customer@servora.com` or `provider@servora.com`, p
 
 ## Architecture
 
-`server/src/routes` defines HTTP contracts, `server/src/controllers` translates HTTP input/output, and five domain modules under `server/src/services` own Prisma business logic. `server/src/validation` contains centralized Zod schemas; reusable middleware provides authentication, role authorization, validation, Helmet security headers, rate limiting, structured Pino logs, and error boundaries. Prisma models use normalized relations, enums, indexes, timestamps, mapped table names, and soft deletion. The client keeps all HTTP access in `client/src/api.ts`.
+`server/src/routes` defines HTTP contracts, `server/src/controllers` translates HTTP input/output, and five domain modules under `server/src/services` own Prisma business logic. `server/src/validation` contains centralized Zod schemas; reusable middleware provides authentication, role authorization, validation, Helmet security headers, rate limiting, structured Pino logs, and error boundaries. Prisma models use normalized relations, enum-backed statuses, indexes, timestamps, mapped table names, and soft deletion. Authentication uses the native `bcrypt` package and JWTs. The client keeps all HTTP access in `client/src/api.ts` and exposes role-aware CRUD management for profiles, categories, services, reviews, bookings, and users.
 
 List endpoints accept `page` and `limit` (maximum 100) and return pagination details in a top-level `meta` object while keeping `data` as an array. Run the automated security/contract tests with `npm test`.
 
 See [API.md](./API.md) for the complete API contract.
+
+## Submission links
+
+- Live API: `https://servora-opal.vercel.app/api`
+- Repository: `https://github.com/GalibDev/servora`
+- API documentation: `https://github.com/GalibDev/servora/blob/main/API.md`
 
 ## Vercel deployment
 

@@ -8,6 +8,7 @@ import { categoryCreateSchema, categoryUpdateSchema, idParamsSchema } from '../v
 
 export const categories = Router();
 categories.get('/', asyncHandler(controller.list));
+categories.get('/manage', auth, requireRole('ADMIN'), asyncHandler(controller.managed));
 categories.get('/:id', validate(idParamsSchema, 'params'), asyncHandler(controller.byId));
 categories.post('/', auth, requireRole('ADMIN'), validate(categoryCreateSchema), asyncHandler(controller.create));
 categories.patch('/:id', auth, requireRole('ADMIN'), validate(idParamsSchema, 'params'), validate(categoryUpdateSchema), asyncHandler(controller.update));

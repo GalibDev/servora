@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "client"
 }
 
@@ -12,6 +12,21 @@ enum Role {
   CUSTOMER
   PROVIDER
   ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum CategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ReviewStatus {
+  PUBLISHED
+  HIDDEN
 }
 
 enum ServiceStatus {
@@ -28,88 +43,99 @@ enum BookingStatus {
 }
 
 model User {
-  id String @id @default(cuid())
-  name String
-  email String @unique
-  password String
-  avatar String?
-  role Role @default(CUSTOMER)
-  isDeleted Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  services Service[]
-  reviews Review[]
-  bookings Booking[]
+  id        String     @id @default(cuid())
+  name      String
+  email     String     @unique
+  password  String
+  avatar    String?
+  role      Role       @default(CUSTOMER)
+  status    UserStatus @default(ACTIVE)
+  isDeleted Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  services  Service[]
+  reviews   Review[]
+  bookings  Booking[]
+
   @@index([role, isDeleted])
+  @@index([status, isDeleted])
   @@map("users")
 }
 
 model Category {
-  id String @id @default(cuid())
-  name String @unique
-  slug String @unique
-  icon String?
+  id          String         @id @default(cuid())
+  name        String         @unique
+  slug        String         @unique
+  icon        String?
   description String?
-  isDeleted Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  services Service[]
+  status      CategoryStatus @default(ACTIVE)
+  isDeleted   Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  services    Service[]
+
   @@index([isDeleted])
+  @@index([status, isDeleted])
   @@map("categories")
 }
 
 model Service {
-  id String @id @default(cuid())
-  title String
+  id          String        @id @default(cuid())
+  title       String
   description String
-  price Decimal @db.Decimal(10, 2)
-  duration Int
-  image String?
-  status ServiceStatus @default(DRAFT)
-  isDeleted Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  categoryId String
-  providerId String
-  category Category @relation(fields: [categoryId], references: [id])
-  provider User @relation(fields: [providerId], references: [id])
-  reviews Review[]
-  bookings Booking[]
+  price       Decimal       @db.Decimal(10, 2)
+  duration    Int
+  image       String?
+  status      ServiceStatus @default(DRAFT)
+  isDeleted   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  categoryId  String
+  providerId  String
+  category    Category      @relation(fields: [categoryId], references: [id])
+  provider    User          @relation(fields: [providerId], references: [id])
+  reviews     Review[]
+  bookings    Booking[]
+
   @@index([categoryId, status, isDeleted])
   @@index([providerId])
   @@map("services")
 }
 
 model Review {
-  id String @id @default(cuid())
-  rating Int
-  comment String?
-  isDeleted Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId String
+  id        String       @id @default(cuid())
+  rating    Int
+  comment   String?
+  status    ReviewStatus @default(PUBLISHED)
+  isDeleted Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  userId    String
   serviceId String
-  user User @relation(fields: [userId], references: [id])
-  service Service @relation(fields: [serviceId], references: [id])
+  user      User         @relation(fields: [userId], references: [id])
+  service   Service      @relation(fields: [serviceId], references: [id])
+
   @@unique([userId, serviceId])
   @@index([serviceId, isDeleted])
+  @@index([serviceId, status, isDeleted])
   @@map("reviews")
 }
 
 model Booking {
-  id String @id @default(cuid())
+  id          String        @id @default(cuid())
   scheduledAt DateTime
-  address String
-  note String?
-  total Decimal @db.Decimal(10, 2)
-  status BookingStatus @default(PENDING)
-  isDeleted Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  customerId String
-  serviceId String
-  customer User @relation(fields: [customerId], references: [id])
-  service Service @relation(fields: [serviceId], references: [id])
+  address     String
+  note        String?
+  total       Decimal       @db.Decimal(10, 2)
+  status      BookingStatus @default(PENDING)
+  isDeleted   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  customerId  String
+  serviceId   String
+  customer    User          @relation(fields: [customerId], references: [id])
+  service     Service       @relation(fields: [serviceId], references: [id])
+
   @@index([customerId, status, isDeleted])
   @@index([serviceId])
   @@map("bookings")

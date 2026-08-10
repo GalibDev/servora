@@ -4,6 +4,7 @@ import { ok } from '../lib/http.js';
 import { pagination, paginationMeta } from '../lib/pagination.js';
 
 export const reviewController = {
+  mine: async (req: Request, res: Response) => { const { page, limit, skip } = pagination(req); const { items, total } = await reviewService.mine(req.user!.id, page, limit, skip); ok(res, 'My reviews retrieved successfully', items, 200, paginationMeta(page, limit, total)); },
   list: async (req: Request, res: Response) => { const { page, limit, skip } = pagination(req); const { items, total } = await reviewService.list({ page, limit, skip, serviceId: req.query.serviceId ? String(req.query.serviceId) : undefined }); ok(res, 'Reviews retrieved successfully', items, 200, paginationMeta(page, limit, total)); },
   byId: async (req: Request, res: Response) => ok(res, 'Review retrieved successfully', await reviewService.byId(String(req.params.id))),
   save: async (req: Request, res: Response) => ok(res, 'Review saved successfully', await reviewService.save(req.user!.id, req.body), 201),

@@ -2,7 +2,7 @@ import type { Role, ServiceStatus } from '@prisma/client';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../lib/http.js';
 
-const include = { category: true, provider: { select: { id: true, name: true, avatar: true } }, reviews: { where: { isDeleted: false } } } as const;
+const include = { category: true, provider: { select: { id: true, name: true, avatar: true } }, reviews: { where: { isDeleted: false, status: 'PUBLISHED' as const } } } as const;
 type Actor = { id: string; role: Role };
 type ServiceInput = { title?: string; description?: string; price?: number; duration?: number; image?: string; status?: ServiceStatus; categoryId?: string; providerId?: string };
 

@@ -4,6 +4,7 @@ import { ok } from '../lib/http.js';
 import { pagination, paginationMeta } from '../lib/pagination.js';
 
 export const categoryController = {
+  managed: async (req: Request, res: Response) => { const { page, limit, skip } = pagination(req); const { items, total } = await categoryService.managed(limit, skip); ok(res, 'Managed categories retrieved successfully', items, 200, paginationMeta(page, limit, total)); },
   list: async (req: Request, res: Response) => { const { page, limit, skip } = pagination(req); const { items, total } = await categoryService.list(limit, skip); ok(res, 'Categories retrieved successfully', items, 200, paginationMeta(page, limit, total)); },
   byId: async (req: Request, res: Response) => ok(res, 'Category retrieved successfully', await categoryService.byId(String(req.params.id))),
   create: async (req: Request, res: Response) => ok(res, 'Category created successfully', await categoryService.create(req.body), 201),

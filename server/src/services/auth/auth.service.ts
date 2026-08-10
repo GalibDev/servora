@@ -1,4 +1,4 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../lib/http.js';
@@ -10,7 +10,7 @@ export async function register(input: { name: string; email: string; password: s
 }
 export async function login(email: string, password: string) {
   const record = await prisma.user.findUnique({ where: { email } });
-  if (!record || record.isDeleted || !(await bcrypt.compare(password, record.password))) throw new AppError(401, 'Invalid email or password');
+  if (!record || record.isDeleted || record.status !== 'ACTIVE' || !(await bcrypt.compare(password, record.password))) throw new AppError(401, 'Invalid email or password');
   const { password: _, ...user } = record;
   return { user, token: jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET!, { expiresIn: '7d' }) };
 }
