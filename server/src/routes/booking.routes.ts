@@ -9,8 +9,8 @@ import { bookingCreateSchema, bookingUpdateSchema, idParamsSchema } from '../val
 export const bookings = Router();
 bookings.use(auth);
 bookings.get('/provider', requireRole('PROVIDER', 'ADMIN'), asyncHandler(controller.incoming));
-bookings.get('/', asyncHandler(controller.customer));
+bookings.get('/', requireRole('CUSTOMER'), asyncHandler(controller.customer));
 bookings.get('/:id', validate(idParamsSchema, 'params'), asyncHandler(controller.byId));
-bookings.post('/', validate(bookingCreateSchema), asyncHandler(controller.create));
+bookings.post('/', requireRole('CUSTOMER'), validate(bookingCreateSchema), asyncHandler(controller.create));
 bookings.patch('/:id', validate(idParamsSchema, 'params'), validate(bookingUpdateSchema), asyncHandler(controller.update));
 bookings.delete('/:id', validate(idParamsSchema, 'params'), asyncHandler(controller.remove));

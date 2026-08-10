@@ -124,7 +124,7 @@ function App() {
   };
   const auth = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); const form = new FormData(event.currentTarget); setAuthError(''); setAuthLoading(true);
-    try { const data = await api<{ token: string; user: User }>(`/auth/${mode}`, { method: 'POST', body: JSON.stringify(Object.fromEntries(form)) }); localStorage.setItem('token', data.token); setUser(data.user); setAuthOpen(false); setNotice(`Welcome${mode === 'register' ? ' to Servora' : ''}, ${data.user.name}.`); }
+    try { const data = await api<{ token: string; user: User }>(`/auth/${mode}`, { method: 'POST', body: JSON.stringify(Object.fromEntries(form)) }); localStorage.setItem('token', data.token); setUser(data.user); setAuthOpen(false); setToast({ type: 'success', message: `Welcome ${data.user.name}. Opening your ${data.user.role.toLowerCase()} dashboard.` }); setDashboardOpen(true); }
     catch (error) { setAuthError((error as Error).message); } finally { setAuthLoading(false); }
   };
   const book = async (event: React.FormEvent<HTMLFormElement>) => {

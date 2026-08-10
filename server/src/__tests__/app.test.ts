@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
+import jwt from 'jsonwebtoken';
 import { app } from '../app.js';
 import { bookingCreateSchema, categoryCreateSchema, serviceCreateSchema } from '../validation/schemas.js';
 
@@ -33,6 +34,33 @@ describe('Servora API production contract', () => {
     const response = await request(app).get('/api/not-a-route');
     expect(response.status).toBe(404);
     expect(response.body).toEqual({ success: false, message: 'Route not found', data: null });
+  });
+});
+
+describe('Role-based access control', () => {
+  const tokenFor = (role: 'CUSTOMER' | 'PROVIDER' | 'ADMIN') => jwt.sign({ id: `${role.toLowerCase()}-id`, role }, process.env.JWT_SECRET!);
+
+  it('prevents customers from creating provider services', async () => {
+    const response = await request(app).post('/api/services').set('Authorization', `Bearer ${tokenFor('CUSTOMER')}`).send({ title: 'Premium Cleaning', description: 'A complete premium cleaning service.', price: 75, duration: 90, categoryId: 'category-id' });
+    expect(response.status).toBe(403);
+    expect(response.body.message).toMatch(/permission/i);
+  });
+
+  it('prevents providers from creating customer bookings', async () => {
+    const response = await request(app).post('/api/bookings').set('Authorization', `Bearer ${tokenFor('PROVIDER')}`).send({ serviceId: 'service-id', scheduledAt: new Date(Date.now() + 86400000).toISOString(), address: 'Dhaka address' });
+    expect(response.status).toBe(403);
+  });
+
+  it('prevents providers and admins from submitting customer reviews', async () => {
+    for (const role of ['PROVIDER', 'ADMIN'] as const) {
+      const response = await request(app).post('/api/reviews').set('Authorization', `Bearer ${tokenFor(role)}`).send({ serviceId: 'service-id', rating: 5 });
+      expect(response.status).toBe(403);
+    }
+  });
+
+  it('keeps the user directory admin-only', async () => {
+    const response = await request(app).get('/api/users').set('Authorization', `Bearer ${tokenFor('CUSTOMER')}`);
+    expect(response.status).toBe(403);
   });
 });
 
