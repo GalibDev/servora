@@ -22,9 +22,9 @@ async function main() {
   const serviceRows = [
     ['Deep Home Cleaning', 'A complete top-to-bottom reset for your home, using eco-conscious products and a meticulous checklist.', 89, 180, 'home-cleaning', 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1000'],
     ['Weekly Home Refresh', 'A reliable weekly clean covering kitchens, bathrooms, floors and high-touch surfaces.', 55, 120, 'home-cleaning', 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=1000'],
-    ['Signature Wellness Massage', 'A restorative in-home massage tailored to release tension and help you feel renewed.', 110, 90, 'beauty-wellness', 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=1000'],
+    ['Signature Wellness Massage', 'A restorative in-home massage tailored to release tension and help you feel renewed.', 110, 90, 'beauty-wellness', 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=1200'],
     ['At-Home Glow Facial', 'A personalized facial with cleansing, exfoliation and hydration for a natural glow.', 78, 60, 'beauty-wellness', 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=1000'],
-    ['Expert Handyman Visit', 'Skilled help for mounting, repairs, fixtures and the small jobs that make a big difference.', 65, 120, 'repairs-maintenance', 'https://images.unsplash.com/photo-1581147036324-c1c89c2c8b5c?w=1000'],
+    ['Expert Handyman Visit', 'Skilled help for mounting, repairs, fixtures and the small jobs that make a big difference.', 65, 120, 'repairs-maintenance', 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200'],
     ['Electrical Safety Check', 'A certified inspection of outlets, switches and common electrical concerns in your home.', 95, 90, 'repairs-maintenance', 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=1000'],
     ['Stress-Free Moving Help', 'Two careful professionals to help pack, lift and settle your essentials safely.', 140, 180, 'moving-services', 'https://images.unsplash.com/photo-1600518464441-9154a4dea21b?w=1000'],
     ['Dog Walking & Play', 'A joyful neighborhood walk with exercise, fresh water and a photo update.', 24, 45, 'pet-care', 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=1000'],
