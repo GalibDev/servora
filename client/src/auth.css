@@ -12,3 +12,7 @@
   color: #8c2f23;
   font-size: 13px;
 }
+
+.role-choice{border:0;padding:0;margin:18px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px}.role-choice legend{font-size:13px;font-weight:600;margin-bottom:9px}.modal .role-choice label{position:relative;display:block;margin:0;padding:13px;border:1px solid var(--line);border-radius:7px;background:#fff;cursor:pointer;transition:border-color .2s ease,background .2s ease,transform .2s ease}.role-choice input{position:absolute;opacity:0;pointer-events:none}.role-choice span{display:grid;gap:4px}.role-choice strong{font-size:13px}.role-choice small{font-size:11px;line-height:1.4;letter-spacing:0;color:#71817b}.role-choice label:has(input:checked){border-color:var(--sage);background:var(--mint);box-shadow:0 0 0 1px var(--sage)}.role-choice label:has(input:focus-visible){outline:2px solid var(--sage);outline-offset:2px}
+
+@media(max-width:480px){.role-choice{grid-template-columns:1fr}.modal .role-choice label{padding:11px 13px}}

@@ -2,7 +2,7 @@ import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import jwt from 'jsonwebtoken';
 import { app } from '../app.js';
-import { bookingCreateSchema, categoryCreateSchema, serviceCreateSchema } from '../validation/schemas.js';
+import { bookingCreateSchema, categoryCreateSchema, registerSchema, serviceCreateSchema } from '../validation/schemas.js';
 
 describe('Servora API production contract', () => {
   it('returns a healthy, consistent response envelope', async () => {
@@ -61,6 +61,13 @@ describe('Role-based access control', () => {
   it('keeps the user directory admin-only', async () => {
     const response = await request(app).get('/api/users').set('Authorization', `Bearer ${tokenFor('CUSTOMER')}`);
     expect(response.status).toBe(403);
+  });
+
+  it('allows customer and provider signup roles but blocks public admin signup', () => {
+    const base = { name: 'New Member', email: 'member@servora.com', password: 'Password123!' };
+    expect(registerSchema.parse({ ...base, role: 'CUSTOMER' }).role).toBe('CUSTOMER');
+    expect(registerSchema.parse({ ...base, role: 'PROVIDER' }).role).toBe('PROVIDER');
+    expect(registerSchema.safeParse({ ...base, role: 'ADMIN' }).success).toBe(false);
   });
 });
 

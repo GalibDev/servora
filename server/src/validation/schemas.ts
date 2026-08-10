@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const idParamsSchema = z.object({ id: z.string().min(1) });
-export const registerSchema = z.object({ name: z.string().trim().min(2).max(80), email: z.email().toLowerCase(), password: z.string().min(8).max(128) });
+export const registerSchema = z.object({ name: z.string().trim().min(2).max(80), email: z.email().toLowerCase(), password: z.string().min(8).max(128), role: z.enum(['CUSTOMER', 'PROVIDER']).default('CUSTOMER') });
 export const loginSchema = z.object({ email: z.email().toLowerCase(), password: z.string().min(1).max(128) });
 
 export const categoryCreateSchema = z.object({ name: z.string().trim().min(2).max(80), slug: z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), icon: z.string().max(12).optional(), description: z.string().trim().max(500).optional() });
