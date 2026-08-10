@@ -15,7 +15,9 @@ Demo accounts after seeding: `customer@servora.com` or `provider@servora.com`, p
 
 ## Architecture
 
-`server/src/routes` defines HTTP contracts, `server/src/services` contains business logic, `server/src/middleware` provides authentication/error boundaries, and `server/src/lib` owns shared infrastructure. Prisma models use normalized relations, enums, indexes, timestamps, mapped table names, and soft deletion. The client keeps all HTTP access in `client/src/api.ts`.
+`server/src/routes` defines HTTP contracts, `server/src/controllers` translates HTTP input/output, and five domain modules under `server/src/services` own Prisma business logic. `server/src/validation` contains centralized Zod schemas; reusable middleware provides authentication, role authorization, validation, Helmet security headers, rate limiting, structured Pino logs, and error boundaries. Prisma models use normalized relations, enums, indexes, timestamps, mapped table names, and soft deletion. The client keeps all HTTP access in `client/src/api.ts`.
+
+List endpoints accept `page` and `limit` (maximum 100) and return pagination details in a top-level `meta` object while keeping `data` as an array. Run the automated security/contract tests with `npm test`.
 
 See [API.md](./API.md) for the complete API contract.
 
