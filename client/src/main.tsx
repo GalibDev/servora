@@ -12,6 +12,13 @@ import './responsive.css';
 
 type User = DashboardUser;
 type View = 'home' | 'services';
+type Toast = { message: string; type: 'success' | 'error' };
+
+const heroSlides = [
+  { image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1200', alt: 'A trusted professional providing a home cleaning service' },
+  { image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=1200', alt: 'A relaxing professional wellness service' },
+  { image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=1200', alt: 'A happy dog receiving trusted local pet care' },
+];
 
 const categoryImages: Record<string, string> = {
   'Home Cleaning': 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=700',
@@ -53,7 +60,11 @@ function App() {
   const [notice, setNotice] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [servicesLoading, setServicesLoading] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [toast, setToast] = useState<Toast | null>(null);
+  const [heroSlide, setHeroSlide] = useState(0);
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const [bookingDate, setBookingDate] = useState<Date>();
@@ -62,9 +73,22 @@ function App() {
   useEffect(() => {
     Promise.all([api<Service[]>('/services?page=1&limit=6'), api<Category[]>('/categories?page=1&limit=20')])
       .then(([serviceRows, categoryRows]) => { setFeatured(serviceRows); setCategories(categoryRows); })
-      .catch(() => setNotice('Connect the API and seed the database to load live services.'));
+      .catch(() => setToast({ type: 'error', message: 'Could not load services. Please try again.' }))
+      .finally(() => setInitialLoading(false));
     if (localStorage.getItem('token')) api<User>('/users/me').then(setUser).catch(() => localStorage.removeItem('token'));
   }, []);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(null), 3600);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  useEffect(() => {
+    if (view !== 'home') return;
+    const timer = window.setInterval(() => setHeroSlide(slide => (slide + 1) % heroSlides.length), 4500);
+    return () => window.clearInterval(timer);
+  }, [view]);
 
   useEffect(() => {
     if (view !== 'services') return;
@@ -74,7 +98,7 @@ function App() {
     setServicesLoading(true);
     apiPaginated<Service>(`/services?${params}`).then(({ data, meta }) => {
       setServices(data); setServiceMeta(meta); window.scrollTo({ top: 0, behavior: 'smooth' });
-    }).catch(error => setNotice((error as Error).message)).finally(() => setServicesLoading(false));
+    }).catch(error => setToast({ type: 'error', message: (error as Error).message })).finally(() => setServicesLoading(false));
   }, [view, servicePage, categoryId, searchTerm]);
 
   useEffect(() => {
@@ -105,15 +129,19 @@ function App() {
   };
   const book = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); if (!user) { setSelected(null); setAuthOpen(true); return; }
-    if (!bookingDate) { setNotice('Please choose a booking date and time.'); return; }
+    if (!bookingDate) { setToast({ type: 'error', message: 'Please choose a booking date and time.' }); return; }
     const form = new FormData(event.currentTarget);
-    try { await api('/bookings', { method: 'POST', body: JSON.stringify({ serviceId: selected!.id, scheduledAt: bookingDate.toISOString(), address: form.get('address'), note: form.get('note') }) }); setSelected(null); setBookingDate(undefined); setNotice('Your booking is confirmed in our system.'); }
-    catch (error) { setNotice((error as Error).message); }
+    setBookingLoading(true);
+    try { await api('/bookings', { method: 'POST', body: JSON.stringify({ serviceId: selected!.id, scheduledAt: bookingDate.toISOString(), address: form.get('address'), note: form.get('note') }) }); setSelected(null); setBookingDate(undefined); setToast({ type: 'success', message: 'Booking confirmed! You can view it in your dashboard.' }); }
+    catch (error) { setToast({ type: 'error', message: (error as Error).message }); }
+    finally { setBookingLoading(false); }
   };
 
   if (dashboardOpen && user) return <Dashboard user={user} onClose={() => setDashboardOpen(false)} />;
 
   return <>
+    {(initialLoading || servicesLoading || bookingLoading) && <div className="toast toast-loading" role="status"><span className="toast-spinner" /><div><strong>{bookingLoading ? 'Confirming your booking' : 'Loading services'}</strong><small>Please wait a moment…</small></div></div>}
+    {toast && <div className={`toast toast-${toast.type}`} role="status"><span className="toast-icon">{toast.type === 'success' ? <Check /> : <X />}</span><div><strong>{toast.type === 'success' ? 'Success' : 'Something went wrong'}</strong><small>{toast.message}</small></div><button aria-label="Dismiss notification" onClick={() => setToast(null)}><X size={16} /></button></div>}
     <header>
       <button className="brand brand-button" onClick={goHome}><span>S</span>servora</button>
       <nav>
@@ -138,7 +166,7 @@ function App() {
     </aside></>}
 
     {view === 'home' ? <main>
-      <section id="home" className="hero hero-split"><div className="hero-copy"><div className="eyebrow"><Sparkles size={15} /> Exceptional help, thoughtfully delivered</div><h1>More time for life.<br /><em>Help is here.</em></h1><p>Book trusted local professionals for your home, wellness, learning, pets and more—all in one beautiful, reassuring place.</p><form className="search" onSubmit={submitSearch}><Search /><input name="search" placeholder="What can we help with?" /><button>Explore services <ArrowRight size={18} /></button></form><div className="proof"><span><Check /> Vetted professionals</span><span><ShieldCheck /> Satisfaction guaranteed</span><span><Star /> Loved by 12,000+ homes</span></div></div><div className="hero-visual"><img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1200" alt="A trusted professional providing a home service" /><div className="hero-rating"><Star size={17} fill="currentColor" /><strong>4.9 average rating</strong><span>from happy homes</span></div><div className="hero-availability"><span><Check size={15} /></span><div><strong>Ready when you are</strong><small>Book in just a few minutes</small></div></div></div></section>
+      <section id="home" className="hero hero-split"><div className="hero-copy"><div className="eyebrow"><Sparkles size={15} /> Exceptional help, thoughtfully delivered</div><form className="search hero-search" onSubmit={submitSearch}><Search /><input name="search" placeholder="What can we help with?" /><button>Explore services <ArrowRight size={18} /></button></form><h1>More time for life.<br /><em>Help is here.</em></h1><p>Book trusted local professionals for your home, wellness, learning, pets and more—all in one beautiful, reassuring place.</p><div className="proof"><span><Check /> Vetted professionals</span><span><ShieldCheck /> Satisfaction guaranteed</span><span><Star /> Loved by 12,000+ homes</span></div></div><div className="hero-visual"><div className="hero-slides">{heroSlides.map((slide, index) => <img className={index === heroSlide ? 'active' : ''} key={slide.image} src={slide.image} alt={slide.alt} />)}</div><button className="slider-arrow slider-prev" aria-label="Previous hero image" onClick={() => setHeroSlide(slide => (slide - 1 + heroSlides.length) % heroSlides.length)}><ArrowLeft /></button><button className="slider-arrow slider-next" aria-label="Next hero image" onClick={() => setHeroSlide(slide => (slide + 1) % heroSlides.length)}><ArrowRight /></button><div className="slider-dots" aria-label="Hero slides">{heroSlides.map((_, index) => <button className={index === heroSlide ? 'active' : ''} aria-label={`Show slide ${index + 1}`} aria-current={index === heroSlide ? 'true' : undefined} key={index} onClick={() => setHeroSlide(index)} />)}</div><div className="hero-rating"><Star size={17} fill="currentColor" /><strong>4.9 average rating</strong><span>from happy homes</span></div><div className="hero-availability"><span><Check size={15} /></span><div><strong>Ready when you are</strong><small>Book in just a few minutes</small></div></div></div></section>
       <section className="categories"><div className="section-title"><div><small>EVERYDAY, ELEVATED</small><h2>What can we take care of?</h2></div><button className="link" onClick={() => openServices()}>View all services <ArrowRight size={16} /></button></div><div className="category-grid category-images">{categories.map(category => <button key={category.id} onClick={() => openServices(category.id)} style={{ backgroundImage: `linear-gradient(90deg,rgba(15,38,31,.78),rgba(15,38,31,.18)),url(${categoryImages[category.name]})` }}><span>{category.name}</span><ArrowRight /></button>)}</div></section>
       <section id="featured" className="services"><div className="section-title"><div><small>CURATED FOR YOU</small><h2>Services people love</h2></div><button className="browse-all-cta" onClick={() => openServices()}>Browse all services <ArrowRight size={18} /></button></div>{notice && <div className="notice">{notice}<button onClick={() => setNotice('')}><X size={16} /></button></div>}<div className="cards">{featured.map(service => <ServiceCard key={service.id} service={service} onBook={chooseService} />)}</div></section>
       <section id="how" className="steps"><small>EFFORTLESS BY DESIGN</small><h2>More ease. Less to-do.</h2><div><article><b>01</b><h3>Tell us what you need</h3><p>Choose a service and the time that works for your life.</p></article><article><b>02</b><h3>Meet your professional</h3><p>Every provider is carefully vetted, rated, and ready to help.</p></article><article><b>03</b><h3>Enjoy the difference</h3><p>Relax while it gets done—backed by our happiness promise.</p></article></div></section>
@@ -154,7 +182,7 @@ function App() {
 
     <footer className="footer"><button className="brand brand-button" onClick={goHome}><span>S</span>servora</button><p>More time for what matters.</p><small>© 2026 Servora. Thoughtful help, close to home.</small></footer>
     {authOpen && <div className="modal"><form onSubmit={auth}><button type="button" className="close" onClick={() => setAuthOpen(false)}><X /></button><small>WELCOME TO SERVORA</small><h2>{mode === 'login' ? 'Good to see you again.' : 'Create your account.'}</h2>{mode === 'register' && <label>Name<input name="name" required minLength={2} /></label>}<label>Email<input name="email" type="email" required /></label><label>Password<input name="password" type="password" required minLength={8} /></label>{authError && <div className="form-error">{authError}</div>}<button className="primary" disabled={authLoading}>{authLoading ? 'Please wait…' : mode === 'login' ? 'Log in' : 'Create account'} {!authLoading && <ArrowRight size={17} />}</button><p>{mode === 'login' ? 'New here? ' : 'Already a member? '}<button type="button" className="link" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setAuthError(''); }}>{mode === 'login' ? 'Create an account' : 'Log in'}</button></p></form></div>}
-    {selected && <div className="modal booking-modal"><form onSubmit={book}><button type="button" className="close" onClick={() => setSelected(null)}><X /></button><small>BOOK YOUR SERVICE</small><h2>{selected.title}</h2><div className="booking-price">${Number(selected.price).toFixed(0)} <span>· {selected.duration} minutes</span></div><DateTimePicker value={bookingDate} onChange={setBookingDate} /><label>Service address<input name="address" required minLength={5} /></label><label>Anything we should know?<textarea name="note" rows={3} /></label><button className="primary" disabled={!bookingDate}><CalendarDays size={17} /> Confirm booking</button></form></div>}
+    {selected && <div className="modal booking-modal"><form onSubmit={book}><button type="button" className="close" onClick={() => setSelected(null)}><X /></button><small>BOOK YOUR SERVICE</small><h2>{selected.title}</h2><div className="booking-price">${Number(selected.price).toFixed(0)} <span>· {selected.duration} minutes</span></div><DateTimePicker value={bookingDate} onChange={setBookingDate} /><label>Service address<input name="address" required minLength={5} /></label><label>Anything we should know?<textarea name="note" rows={3} /></label><button className="primary" disabled={!bookingDate || bookingLoading}><CalendarDays size={17} /> {bookingLoading ? 'Confirming…' : 'Confirm booking'}</button></form></div>}
   </>;
 }
 
